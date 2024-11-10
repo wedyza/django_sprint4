@@ -40,4 +40,4 @@ handler404 = 'pages.views.page_not_found'
 handler403 = 'pages.views.csrf_failure'
 handler500 = 'pages.views.internal_server_error'
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -143,7 +143,7 @@ class DeletePost(PostBase, generic.DeleteView):
 
 
 @login_required
-def postComment(request, post_id):
+def post_comment(request, post_id):
     form = CommentForm(request.POST)
     post = get_object_or_404(Post, post_id)
     if request.user is None or post is None:

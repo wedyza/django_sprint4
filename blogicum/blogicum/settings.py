@@ -25,13 +25,13 @@ SECRET_KEY = 'django-insecure-f*k80lq&!(9+lzp!j-8s7#&m%q40+rha!j=9cb2k&tmt*91f9v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-MEDIA_ROOT = BASE_DIR / 'media' 
+MEDIA_ROOT = BASE_DIR / 'media'
 
 ALLOWED_HOSTS = []
 
-LOGIN_URL = 'login' 
+LOGIN_URL = 'login'
 
-CSRF_FAILURE_VIEW = 'pages.views.csrf_failure' 
+CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
 
 # Application definition
 
