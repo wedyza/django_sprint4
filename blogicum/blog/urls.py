@@ -36,7 +36,7 @@ urlpatterns = [
     ),
     path(
         'posts/<int:post_id>/comment/',
-        views.postComment,
+        views.post_comment,
         name='add_comment'
     ),
     path(
