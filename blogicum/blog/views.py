@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post, Category, Comment
 from django.http import Http404
 from django.contrib.auth import get_user_model
-from django.views.generic import CreateView, UpdateView, DetailView, DeleteView
+from django.views.generic import UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import PostForm, UserForm, CommentForm
 from django.views import generic
@@ -96,7 +96,6 @@ class UserUpdate(UpdateView):
     template_name = 'blog/user.html'
 
     def get_object(self, queryset=None):
-        '''This loads the profile of the currently logged in user'''
         return self.request.user
 
     def get_success_url(self):
@@ -132,8 +131,6 @@ class CreatePost(PostBase, generic.CreateView):
 class UpdatePost(PostBase, generic.UpdateView):
     form_class = PostForm
     template_name = 'blog/create.html'
-    
-    
 
     def get_success_url(self):
         return reverse(
@@ -146,7 +143,7 @@ class DeletePost(PostBase, generic.DeleteView):
 
 
 @login_required
-def PostComment(request, post_id):
+def postComment(request, post_id):
     form = CommentForm(request.POST)
     post = get_object_or_404(Post, post_id)
     if request.user is None or post is None:
