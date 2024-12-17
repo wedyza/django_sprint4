@@ -5,7 +5,6 @@ User = get_user_model()
 
 
 class BaseModel(models.Model):
-    """Абстрактная модель. Добавляет флаг is_published и дату публикации."""
     is_published = (
         models.BooleanField(
             default=True,
