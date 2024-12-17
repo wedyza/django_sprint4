@@ -11,6 +11,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 User = get_user_model()
 
 
@@ -18,7 +19,8 @@ def index(request):
     template = 'blog/index.html'
     posts = Post.objects.select_related('category').filter(is_published=True) \
         .filter(category__is_published=True) \
-        .filter(pub_date__date__lt=timezone.now()).order_by('-pub_date')
+        .filter(pub_date__date__lt=timezone.now()).order_by('-pub_date') \
+        .annotate(comment_count=Count('comment'))
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -53,7 +55,8 @@ def category_posts(request, category_slug):
 
     posts = Post.objects.select_related('category').filter(is_published=True) \
         .filter(category__slug=category_slug) \
-        .filter(pub_date__date__lt=timezone.now()).order_by('-pub_date')
+        .filter(pub_date__date__lt=timezone.now()).order_by('-pub_date') \
+        .annotate(comment_count=Count('comment'))
     template = 'blog/category.html'
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
@@ -67,7 +70,8 @@ def category_posts(request, category_slug):
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
-    posts = Post.objects.filter(author=user).order_by('-pub_date')
+    posts = Post.objects.filter(author=user).order_by('-pub_date') \
+        .annotate(comment_count=Count('comment'))
     template_name = 'blog/profile.html'
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
@@ -113,9 +117,6 @@ class PostBase(LoginRequiredMixin):
             'blog:profile', kwargs={'username': self.request.user.username}
         )
 
-    def get_queryset(self):
-        return self.model.objects.filter(author=self.request.user)
-
 
 class CreatePost(PostBase, generic.CreateView):
     template_name = 'blog/create.html'
@@ -132,6 +133,15 @@ class UpdatePost(PostBase, generic.UpdateView):
     form_class = PostForm
     template_name = 'blog/create.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.get_object().author != request.user:
+            return redirect(
+                'blog:post_detail', id=self.kwargs['post_id']
+            )
+        return super().dispatch(request, *args, **kwargs)
+            
+        
+
     def get_success_url(self):
         return reverse(
             'blog:profile', kwargs={'username': self.request.user.username}
@@ -145,7 +155,7 @@ class DeletePost(PostBase, generic.DeleteView):
 @login_required
 def post_comment(request, post_id):
     form = CommentForm(request.POST)
-    post = get_object_or_404(Post, post_id)
+    post = get_object_or_404(Post, pk=post_id)
     if request.user is None or post is None:
         return Http404
     if form.is_valid():
